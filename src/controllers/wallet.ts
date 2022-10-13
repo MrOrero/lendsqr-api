@@ -36,9 +36,7 @@ export const createWallet = async (
 
         // Check if User has already created a wallet
         if (walletId) {
-            return next(
-                formatCustomError("This user already has a wallet", 403)
-            );
+            throw formatCustomError("This user already has a wallet", 403);
         }
 
         //generate wallet number
@@ -62,12 +60,14 @@ export const createWallet = async (
             message: `Wallet sucessfully Created, your pin has been sucessfully created and your wallet number is ${createdWallet[0].wallet_number}`,
             data: createdWallet,
         });
+        return;
     } catch (error: any) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         console.log(error);
-        return next(error);
+        next(error);
+        return error;
     }
 };
 
@@ -84,12 +84,10 @@ export const getWallet = async (
                 .select("id")
         )[0];
 
-        if (!wallet.id) {
-            return next(
-                formatCustomError(
-                    "You do not yet have a wallet, head over and create one",
-                    401
-                )
+        if (!wallet) {
+            throw formatCustomError(
+                "You do not yet have a wallet, head over and create one",
+                401
             );
         }
 
@@ -118,12 +116,14 @@ export const getWallet = async (
         res.status(200).json({
             data: formattedWalletDetails,
         });
+        return;
     } catch (error: any) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         console.log(error);
-        return next(error);
+        next(error);
+        return error;
     }
 };
 
@@ -146,16 +146,14 @@ export const fundWallet = async (
                 .select("*")
         )[0];
         if (!wallet) {
-            return next(
-                formatCustomError(
-                    "You do not yet have a wallet, head over and create one",
-                    401
-                )
+            throw formatCustomError(
+                "You do not yet have a wallet, head over and create one",
+                401
             );
         }
 
         if (wallet.pin !== pin) {
-            return next(formatCustomError("Incorrect Pin", 401));
+            throw formatCustomError("Incorrect Pin", 401);
         }
         const updatedBalance = +wallet.balance + +amount;
 
@@ -177,12 +175,14 @@ export const fundWallet = async (
             message: "Wallet funded Sucessfully",
             data: formattedWalletDetails,
         });
+        return;
     } catch (error: any) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         console.log(error);
-        return next(error);
+        next(error);
+        return error;
     }
 };
 
@@ -198,27 +198,25 @@ export const withdrawFunds = async (
 
     const { amount, pin } = req.body;
     try {
-        // Chexk if wallet already exists
+        // Check if wallet already exists
         const wallet: IWallet = (
             await conn<IWallet>(Model.wallet)
                 .where("user_id", +req.userId)
                 .select("*")
         )[0];
         if (!wallet) {
-            return next(
-                formatCustomError(
-                    "You do not yet have a wallet, head over and create one",
-                    401
-                )
+            throw formatCustomError(
+                "You do not yet have a wallet, head over and create one",
+                401
             );
         }
 
         if (wallet.pin !== pin) {
-            return next(formatCustomError("Incorrect Pin", 401));
+            throw formatCustomError("Incorrect Pin", 401);
         }
 
         if (+wallet.balance < amount) {
-            return next(formatCustomError("Insufficient Balance", 400));
+            throw formatCustomError("Insufficient Balance", 400);
         }
         const debitedBalance = +wallet.balance - +amount;
 
@@ -239,12 +237,14 @@ export const withdrawFunds = async (
             message: "Withdrawal Sucessful",
             data: formattedWalletDetails,
         });
+        return;
     } catch (error: any) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         console.log(error);
-        return next(error);
+        next(error);
+        return error;
     }
 };
 
@@ -266,25 +266,21 @@ export const transferFunds = async (
                 .select("*")
         )[0];
         if (!senderWallet) {
-            return next(
-                formatCustomError(
-                    "You do not yet have a wallet, head over and create one",
-                    401
-                )
+            throw formatCustomError(
+                "You do not yet have a wallet, head over and create one",
+                401
             );
         }
 
         if (senderWallet.pin !== pin) {
-            return next(formatCustomError("Incorrect Pin", 401));
+            throw formatCustomError("Incorrect Pin", 401);
         }
 
         if (+senderWallet.balance < amount) {
-            return next(formatCustomError("Insufficient Balance", 403));
+            throw formatCustomError("Insufficient Balance", 400);
         }
-        if (+senderWallet.wallet_number === recipientWallet) {
-            return next(
-                formatCustomError("You cannot transfer to yourself", 403)
-            );
+        if (+senderWallet.wallet_number === +recipientWallet) {
+            throw formatCustomError("You cannot transfer to yourself", 403);
         }
 
         // get recipient account
@@ -347,12 +343,14 @@ export const transferFunds = async (
             }`,
             data: formattedWalletDetails,
         });
+        return;
     } catch (error: any) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         console.log(error);
-        return next(error);
+        next(error);
+        return error;
     }
 };
 export const getTransactions = async (
@@ -361,60 +359,82 @@ export const getTransactions = async (
     next: NextFunction
 ) => {
     try {
+        const walletId = (
+            await conn<IWallet>(Model.wallet)
+                .where("user_id", +req.userId)
+                .select("id")
+        )[0];
+
+        if (!walletId) {
+            throw formatCustomError(
+                "You do not yet have a wallet, head over and create one",
+                401
+            );
+        }
+
         const updatedSenderWallet = await conn<ITransaction>(Model.transaction)
             .where(function () {
-                this.where("sender_id", +req.userId).orWhere(
+                this.where("sender_id", walletId.id).orWhere(
                     "reciever_id",
-                    +req.userId
+                    walletId.id
                 );
             })
             .select("*");
+
+        if (updatedSenderWallet.length === 0) {
+            throw formatCustomError("No transaction details", 401);
+        }
+
         const formattedWallet = updatedSenderWallet.map(async (wallet) => {
-            if (wallet.sender_id === +req.userId) {
-                const reciever = (
-                    await conn<IUser>(Model.user)
-                        .select("first_name", "id")
+            if (wallet.sender_id === +walletId.id) {
+                //If the current user is the one that did the transfer, get details of the reciever
+                const recieverWallet = (
+                    await conn<IWallet>(Model.wallet)
+                        .select("wallet_number", "user_id")
                         .where("id", wallet.reciever_id)
                 )[0];
-                const walletNumber = (
-                    await conn<IWallet>(Model.wallet)
-                        .select("wallet_number")
-                        .where("user_id", reciever.id)
-                )[0].wallet_number;
+                const reciever = (
+                    await conn<IUser>(Model.user)
+                        .select("first_name")
+                        .where("id", recieverWallet.user_id)
+                )[0];
                 return {
                     amount: wallet.amount,
                     reference: reciever.first_name,
-                    wallet_number: walletNumber,
+                    wallet_number: recieverWallet.wallet_number,
                     type: "debit",
                 };
             }
-            if (wallet.reciever_id === +req.userId) {
-                const reciever = (
-                    await conn<IUser>(Model.user)
-                        .select("first_name", "id")
+            if (wallet.reciever_id === +walletId.id) {
+                //If the current user is the one that recieved the transfer, get details of the sender
+                const senderWallet = (
+                    await conn<IWallet>(Model.wallet)
+                        .select("wallet_number", "user_id")
                         .where("id", wallet.sender_id)
                 )[0];
-                const walletNumber = (
-                    await conn<IWallet>(Model.wallet)
-                        .select("wallet_number")
-                        .where("user_id", reciever.id)
-                )[0].wallet_number;
+                const sender = (
+                    await conn<IUser>(Model.user)
+                        .select("first_name")
+                        .where("id", senderWallet.user_id)
+                )[0];
                 return {
                     amount: wallet.amount,
-                    reference: reciever.first_name,
-                    wallet_number: walletNumber,
+                    reference: sender.first_name,
+                    wallet_number: senderWallet.wallet_number,
                     type: "credit",
                 };
             }
         });
         const result = await Promise.all(formattedWallet);
-        console.log(result);
+        // console.log(result);
         res.status(200).json(result);
+        return;
     } catch (error: any) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         console.log(error);
-        return next(error);
+        next(error);
+        return error;
     }
 };

@@ -3,6 +3,7 @@ import knexfile from "./database/knexfile";
 
 let conn: Knex;
 if (process.env.NODE_ENV === "test") {
+    console.log("testing");
     conn = knex(knexfile.test);
 } else {
     conn = knex(knexfile.development);

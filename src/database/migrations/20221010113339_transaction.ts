@@ -8,12 +8,12 @@ export async function up(knex: Knex): Promise<void> {
             table
                 .integer("sender_id")
                 .unsigned()
-                .references("user.id")
+                .references("wallet.id")
                 .onDelete("CASCADE");
             table
                 .integer("reciever_id")
                 .unsigned()
-                .references("user.id")
+                .references("wallet.id")
                 .onDelete("CASCADE");
             table.string("amount").notNullable();
             table.timestamps(true, false, true);

@@ -29,11 +29,11 @@ export const signup = async (
     const { email, password, firstname, lastname } = req.body as RequestBody;
     try {
         // Check if user is already signed up
-        const existingUser: IUser[] = await conn<IUser>(Model.user).where({
+        const existingUser: IUser[] = await conn(Model.user).where({
             email: email,
         });
         if (existingUser.length !== 0) {
-            return next(formatCustomError("This user already exists", 403));
+            throw formatCustomError("This user already exists", 403);
         }
 
         //Encrypt password before saving in database
@@ -48,9 +48,7 @@ export const signup = async (
 
         const user: number[] = await insert(Model.user, data);
 
-        console.log(user);
-
-        //user variable returns an array with the created user id,
+        //user variable returns an array with the created user id,3
         // which we use to query all details from the database
         const createdUser: IUser[] = await conn<IUser>(Model.user)
             .where("id", user[0])
@@ -60,12 +58,14 @@ export const signup = async (
             message: `Welcome '${createdUser[0].first_name}, you have been succesfully signed up`,
             data: createdUser,
         });
+        return;
     } catch (error: any) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         console.log(error);
-        return next(error);
+        next(error);
+        return error;
     }
 };
 
@@ -89,13 +89,13 @@ export const login = async (
                 .select("*")
         )[0];
         if (!user) {
-            return next(formatCustomError("Invalid Email or Password", 401));
+            throw formatCustomError("Invalid Email or Password", 401);
         }
 
         //Check if password is equals to hashed password in the database
         const isEqual = await comparePassword(password, user.password);
         if (!isEqual) {
-            return next(formatCustomError("Incorrect Email or Password", 401));
+            throw formatCustomError("Incorrect Email or Password", 401);
         }
 
         //Sign token that we use for authentication
@@ -110,11 +110,13 @@ export const login = async (
                 email: user.email,
             },
         });
+        return;
     } catch (error: any) {
         if (!error.statusCode) {
             error.statusCode = 500;
         }
         console.log(error);
-        return next(error);
+        next(error);
+        return error;
     }
 };

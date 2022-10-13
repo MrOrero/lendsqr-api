@@ -18,6 +18,20 @@ const config: { [key: string]: Knex.Config } = {
             directory: path.resolve(__dirname, "migrations"),
         },
     },
+    test: {
+        client: "mysql2",
+        connection: {
+            host: "sql8.freesqldatabase.com",
+            user: "sql8526202",
+            password: "XNyc7SSIku",
+            database: "sql8526202",
+        },
+        useNullAsDefault: true,
+        migrations: {
+            // tableName: "lendsqr_migrations",
+            directory: path.resolve(__dirname, "migrations"),
+        },
+    },
 
     staging: {
         client: "postgresql",
