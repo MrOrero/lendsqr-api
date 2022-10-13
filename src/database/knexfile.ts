@@ -7,24 +7,23 @@ const config: { [key: string]: Knex.Config } = {
     development: {
         client: "mysql2",
         connection: {
-            host: "sql8.freesqldatabase.com",
-            user: "sql8524428",
-            password: "tWRJS5xqM2",
-            database: "sql8524428",
+            host: process.env.DEVELOPMENT_HOST,
+            user: process.env.DEVELOPMENT_USER,
+            password: process.env.DEVELOPMENT_PASSWORD,
+            database: process.env.DEVELOPMENT_DATABASE,
         },
         useNullAsDefault: true,
         migrations: {
-            // tableName: "lendsqr_migrations",
             directory: path.resolve(__dirname, "migrations"),
         },
     },
     test: {
         client: "mysql2",
         connection: {
-            host: "sql8.freesqldatabase.com",
-            user: "sql8526202",
-            password: "XNyc7SSIku",
-            database: "sql8526202",
+            host: process.env.TEST_HOST,
+            user: process.env.TEST_USER,
+            password: process.env.TEST_PASSWORD,
+            database: process.env.TEST_DATABASE,
         },
         useNullAsDefault: true,
         migrations: {
@@ -32,36 +31,21 @@ const config: { [key: string]: Knex.Config } = {
             directory: path.resolve(__dirname, "migrations"),
         },
     },
-
-    staging: {
-        client: "postgresql",
-        connection: {
-            database: "my_db",
-            user: "username",
-            password: "password",
-        },
-        pool: {
-            min: 2,
-            max: 10,
-        },
-        migrations: {
-            tableName: "knex_migrations",
-        },
-    },
-
     production: {
-        client: "postgresql",
+        client: "mysql2",
         connection: {
-            database: "my_db",
-            user: "username",
-            password: "password",
+            host: process.env.DEVELOPMENT_HOST,
+            user: process.env.DEVELOPMENT_USER,
+            password: process.env.DEVELOPMENT_PASSWORD,
+            database: process.env.DEVELOPMENT_DATABASE,
+        },
+        useNullAsDefault: true,
+        migrations: {
+            directory: path.resolve(__dirname, "migrations"),
         },
         pool: {
             min: 2,
             max: 10,
-        },
-        migrations: {
-            tableName: "knex_migrations",
         },
     },
 };

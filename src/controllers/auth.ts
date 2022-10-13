@@ -37,7 +37,7 @@ export const signup = async (
         }
 
         //Encrypt password before saving in database
-        const hashedPassword = await hashPassword(password, 10);
+        const hashedPassword = await hashPassword(password);
         // Insert User into DB
         const data: UserInsertData = {
             first_name: firstname,

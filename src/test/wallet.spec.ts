@@ -19,7 +19,7 @@ after(async () => {
 describe("Wallet controller - create wallet", function () {
     before(async () => {
         await conn.migrate.latest();
-        const hashedPassword = await hashPassword("test", 10);
+        const hashedPassword = await hashPassword("test");
 
         userId = await conn(Model.user).insert({
             first_name: "test",
@@ -271,7 +271,7 @@ describe("Wallet controller - transfer wallet", function () {
 
         senderWalletNumber = number.wallet_number;
 
-        const hashedPassword = await hashPassword("test", 10);
+        const hashedPassword = await hashPassword("test");
         const recipientId = await conn(Model.user).insert({
             first_name: "test",
             last_name: "test",

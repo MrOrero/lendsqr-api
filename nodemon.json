@@ -1,4 +1,17 @@
 {
+  "env": {
+    "DEVELOPMENT_HOST": "sql8.freesqldatabase.com",
+    "DEVELOPMENT_USER": "sql8524428",
+    "DEVELOPMENT_PASSWORD": "tWRJS5xqM2",
+    "DEVELOPMENT_DATABASE": "sql8524428",
+    "TEST_HOST": "sql8.freesqldatabase.com",
+    "TEST_USER": "sql8526202",
+    "TEST_PASSWORD": "XNyc7SSIku",
+    "TEST_DATABASE": "sql8526202",
+    "JWT_SECRET": "secrettokenkey",
+    "SALT": "10"
+  },
+
   "watch": ["src"],
   "ext": ".ts",
   "ignore": [],

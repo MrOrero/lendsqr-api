@@ -18,7 +18,7 @@ const isAuth = (req: Request, res: Response, next: NextFunction) => {
     const token = authHeader.split(" ")[1];
     let decodedToken: any;
     try {
-        decodedToken = jwt.verify(token, "secrettokenkey");
+        decodedToken = jwt.verify(token, process.env.JWT_SECRET!);
     } catch (error: any) {
         console.log(error.message);
         if (error.message === "jwt expired") {

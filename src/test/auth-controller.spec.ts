@@ -67,7 +67,7 @@ describe("Auth controller - login", function () {
     before(async () => {
         await conn.migrate.latest();
 
-        const hashedPassword = await hashPassword("test", 10);
+        const hashedPassword = await hashPassword("test");
         await conn(Model.user).insert({
             first_name: "test",
             last_name: "test",
