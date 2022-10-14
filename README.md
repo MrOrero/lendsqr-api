@@ -67,7 +67,7 @@ All tests are written in the `src/test` directory.
 
 # E-R Diagram
 
-![alt text](https://github.com/MrOrero/lendqr-api/blob/main/er-diagram.png?raw=true)
+![alt text](https://github.com/MrOrero/lendsqr-api/blob/main/er-diagram.PNG?raw=true)
 
 # REST API
 
