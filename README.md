@@ -67,7 +67,7 @@ All tests are written in the `src/test` directory.
 
 # E-R Diagram
 
-![alt text](https://github.com/MrOrero/lendqr-api/blob/main/er-diagram.png?raw=true)
+![alt text](https://github.com/MrOrero/lendsqr-api/blob/main/er-diagram.PNG?raw=true)
 
 # REST API
 
@@ -108,4 +108,4 @@ https://www.getpostman.com/collections/04392b6ed29ac571618e
 
 #### Deployed Link
 
-You can [click here](https://lendsqr-wallet-api.herokuapp.com) to test the api
+You can [click here](https://ozoreorero-lendsqr-be-test.herokuapp.com/) to test the api
