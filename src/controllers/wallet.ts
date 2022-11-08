@@ -332,7 +332,7 @@ export const transferFunds = async (
 
             recipient = (
                 await trx<IUser>(Model.user)
-                    .where({ id: +updatedRecieverWallet.id })
+                    .where({ id: +updatedRecieverWallet.user_id })
                     .select("first_name")
             )[0];
         });
